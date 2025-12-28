@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Epok's Store Calculator</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="dot"></div>
+        <div>
+          <div class="brandTitle">Epok's Store</div>
+          <div class="brandSub">Store Calculator</div>
+        </div>
+      </div>
+
+      <nav class="nav">
+        <button class="navBtn active" data-view="shop">Shop items</button>
+        <button class="navBtn" data-view="missing">Missing Price Items</button>
+        <button class="navBtn" data-view="cart">Cart</button>
+        <button class="navBtn" data-view="suggest">Suggest items</button>
+        <button class="navBtn" data-view="settings">Settings</button>
+      </nav>
+
+      <div class="sidebarFooter">
+        <div class="tiny">Tip: Use search, then click <span class="kbd">+</span> to add.</div>
+        <div class="tiny">Data: <span id="dataStamp">loading…</span></div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="topbarLeft">
+          <h1 id="viewTitle">Shop items</h1>
+          <div class="subtle" id="viewSubtitle">Browse everything that has a USD price.</div>
+        </div>
+        <div class="topbarRight">
+          <div class="pill" id="modePill">Mode: Clean</div>
+          <button class="ghostBtn" id="refreshBtn" title="Refresh data">Refresh</button>
+        </div>
+      </header>
+
+      <section class="content">
+
+        <!-- SHOP -->
+        <div class="view" id="view-shop">
+          <div class="controls">
+            <input id="searchShop" class="input" placeholder="Search shop items…" />
+            <select id="catShop" class="select">
+              <option value="">All categories</option>
+            </select>
+            <select id="sortShop" class="select">
+              <option value="best">Best value (USD per 1M)</option>
+              <option value="usdAsc">USD (low → high)</option>
+              <option value="usdDesc">USD (high → low)</option>
+              <option value="valueDesc">JBCL value (high → low)</option>
+              <option value="nameAsc">Name (A → Z)</option>
+            </select>
+            <div class="spacer"></div>
+            <button class="btn" id="autoCartBtn">Auto-cart</button>
+          </div>
+          <div class="grid" id="shopGrid"></div>
+        </div>
+
+        <!-- MISSING -->
+        <div class="view hidden" id="view-missing">
+          <div class="controls">
+            <input id="searchMissing" class="input" placeholder="Search missing items…" />
+            <select id="catMissing" class="select">
+              <option value="">All categories</option>
+            </select>
+            <select id="sortMissing" class="select">
+              <option value="valueDesc">JBCL value (high → low)</option>
+              <option value="nameAsc">Name (A → Z)</option>
+            </select>
+            <div class="spacer"></div>
+            <button class="btn" id="suggestFromMissingBtn">Suggest selected</button>
+          </div>
+          <div class="grid" id="missingGrid"></div>
+        </div>
+
+        <!-- CART -->
+        <div class="view hidden" id="view-cart">
+          <div class="cartHeader">
+            <div>
+              <div class="subtle">Your cart</div>
+              <div class="big" id="cartTotal">$0.00</div>
+              <div class="subtle" id="cartMeta">0 items</div>
+            </div>
+            <div class="cartBtns">
+              <button class="btn" id="copyNamesBtn">Copy names</button>
+              <button class="ghostBtn" id="clearCartBtn">Clear</button>
+            </div>
+          </div>
+          <div class="list" id="cartList"></div>
+        </div>
+
+        <!-- SUGGEST -->
+        <div class="view hidden" id="view-suggest">
+          <div class="controls">
+            <input id="suggestSearch" class="input" placeholder="Find any item (values list)…" />
+            <select id="suggestCat" class="select">
+              <option value="">Category (optional)</option>
+              <option>Vehicle</option><option>Rim</option><option>Spoiler</option><option>Texture</option><option>Body Color</option><option>Drift</option><option>Horn</option><option>Furniture</option><option>Other</option>
+            </select>
+            <button class="btn" id="addSuggestionBtn">Add suggestion</button>
+            <div class="spacer"></div>
+            <button class="ghostBtn" id="copySuggestionsBtn">Copy suggestions</button>
+            <button class="ghostBtn" id="clearSuggestionsBtn">Clear</button>
+          </div>
+          <div class="panel">
+            <div class="panelTitle">Suggestions to add to the shop pricing</div>
+            <div class="subtle">Pick items that have no USD price yet, add a category, then copy the list to send to Epok.</div>
+            <div class="list" id="suggestList"></div>
+          </div>
+        </div>
+
+        <!-- SETTINGS -->
+        <div class="view hidden" id="view-settings">
+          <div class="panel">
+            <div class="panelTitle">Pricing mode</div>
+            <div class="row">
+              <label class="label">Mode</label>
+              <select id="priceMode" class="select">
+                <option value="clean">Clean prices</option>
+                <option value="duped">Duped prices (estimated)</option>
+              </select>
+            </div>
+            <div class="subtle">“Duped” is an estimate unless you manually set a duped price. Estimation uses a global multiplier you can adjust below.</div>
+
+            <div class="row">
+              <label class="label">Duped multiplier</label>
+              <input id="dupedMult" class="input" type="number" step="0.01" min="0.1" max="1" />
+            </div>
+
+            <hr class="hr" />
+
+            <div class="panelTitle">Auto-update values (Option A)</div>
+            <div class="subtle">If you host a JSON online (GitHub raw / Vercel / etc.), paste the URL here. The site will fetch it on load and on refresh.</div>
+            <div class="row">
+              <label class="label">Values JSON URL</label>
+              <input id="valuesUrl" class="input" placeholder="https://.../values.json" />
+            </div>
+            <div class="row">
+              <label class="label">Auto-refresh</label>
+              <select id="autoRefresh" class="select">
+                <option value="off">Off</option>
+                <option value="5">Every 5 minutes</option>
+                <option value="15">Every 15 minutes</option>
+                <option value="60">Every 60 minutes</option>
+              </select>
+            </div>
+
+            <div class="row">
+              <label class="label">Save</label>
+              <button class="btn" id="saveSettingsBtn">Save settings</button>
+              <button class="ghostBtn" id="resetSettingsBtn">Reset</button>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panelTitle">Edit shop prices</div>
+            <div class="subtle">Click an item below to edit its USD price. Optional: “scale” everything based on one anchor item.</div>
+
+            <div class="controls">
+              <input id="editSearch" class="input" placeholder="Search editable shop items…" />
+              <div class="spacer"></div>
+              <button class="ghostBtn" id="scaleFromAnchorBtn">Scale all from anchor</button>
+            </div>
+
+            <div class="list" id="editList"></div>
+          </div>
+        </div>
+
+      </section>
+    </main>
+  </div>
+
+  <script src="./data.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
