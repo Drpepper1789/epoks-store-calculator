@@ -1,0 +1,12 @@
+{
+  "lastUpdated": "manual",
+  "items": [
+    {
+      "name": "Torpedo",
+      "category": "Vehicle",
+      "jbclValue": 49000000,
+      "demand": "Decent",
+      "trend": "Stable"
+    }
+  ]
+}
